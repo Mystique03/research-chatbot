@@ -1,0 +1,42 @@
+torch
+
+#llm and RAG
+langchain
+langchain-community
+langchain-core
+langchain-google-genai
+
+#embeddings, vector-DB and hybrid search
+sentence-transformers
+pinecone
+rank-bm25
+
+#pdf parsing
+pymupdf
+unstructured[pdf]
+unstructured
+
+#web fallback (web search)
+tavily-python
+arxiv
+biopython
+
+#UI and API
+streamlit
+fastapi
+uvicorn
+python-multipart
+httpx
+pydantic
+
+#helper libs
+python-dotenv
+numpy
+pandas
+tqdm
+tiktoken
+
+#evaluation
+ragas
+datasets
+scikit-learn
