@@ -4,6 +4,6 @@ __pycache__/
 .venv/
 *.pkl
 *.log
-.claude
+.claude/
 bm25_index/
 data/
