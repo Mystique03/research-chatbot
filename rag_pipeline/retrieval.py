@@ -4,13 +4,18 @@ from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
 
+import re
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnableLambda
 from tavily import TavilyClient
+
+def _strip_thinking(text: str) -> str:
+    return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
 
 # Congif
 EMBED_MODEL = "BAAI/bge-small-en-v1.5"
@@ -20,10 +25,12 @@ RELEVANCE_THRESHOLD = 0.55
 
 embedder = SentenceTransformer(EMBED_MODEL)
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
-llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", 
-                             temperature=0.2,
-                             google_api_key=os.getenv("GOOGLE_API_KEY"),
-                             max_retries=3)
+llm = ChatGroq(
+    model="qwen/qwen3-32b",
+    temperature=0.2,
+    api_key=os.getenv("GROQ_API_KEY"),
+    max_retries=3
+)
 tavily = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 
 def hybrid_search(query, bm25_paths):
@@ -87,7 +94,7 @@ Question: {question}
                                               
 Answer:""")
 
-qa_chain = QA_PROMPT | llm | StrOutputParser()
+qa_chain = QA_PROMPT | llm | StrOutputParser() | RunnableLambda(_strip_thinking)
 
 def answer_from_docs(question, docs):
     context = "\n\n---\n\n".join(
@@ -109,7 +116,7 @@ Question: {question}
 
 Answer:""")
 
-web_chain = WEB_PROMPT | llm | StrOutputParser()
+web_chain = WEB_PROMPT | llm | StrOutputParser() | RunnableLambda(_strip_thinking)
 
 def answer_from_web(question):
     results = tavily.search(query=question, max_results=3)

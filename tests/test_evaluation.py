@@ -16,14 +16,6 @@ qa_pairs = [
         "ground_truth": "WMT 2014 English-German dataset.",
     },
     {
-        "question":    "What BLEU score did the model achieve on English to French?",
-        "ground_truth": "41.0 BLEU score.",
-    },
-    {
-        "question":    "How many attention heads does the base model use?",
-        "ground_truth": "8 attention heads.",
-    },
-    {
         "question":    "What optimizer was used for training?",
         "ground_truth": "Adam optimizer.",
     },
@@ -44,6 +36,6 @@ print(f"  └─ Avg total         : {results['avg_total_latency_sec']}s")
 print(f"\n  Cost")
 print(f"  ├─ Avg per query     : ${results['avg_cost_per_query_usd']}")
 print(f"  ├─ Total ({results['total_queries']} queries)  : ${results['total_cost_usd']}")
-print(f"  └─ Free tier limit   : 1500 req/day")
+print(f"  └─ Free tier limit   : $0.00/day (Groq free tier)")
 
 save_results(results, path="data/evaluation_results.json")

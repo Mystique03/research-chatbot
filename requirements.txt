@@ -4,7 +4,8 @@ torch
 langchain
 langchain-community
 langchain-core
-langchain-google-genai
+langchain-groq
+langchain-huggingface
 
 #embeddings, vector-DB and hybrid search
 sentence-transformers

@@ -7,29 +7,32 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from datasets import Dataset
-from ragas import evaluate
+from ragas import evaluate, RunConfig
 from ragas.metrics import _faithfulness, _answer_relevancy, _context_entity_recall
+
+# Groq only supports n=1; override RAGAS default of n=3
+_answer_relevancy.strictness = 1
 from ragas.llms import LangchainLLMWrapper
 from ragas.embeddings import LangchainEmbeddingsWrapper
-from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from langchain_groq import ChatGroq
+from langchain_huggingface import HuggingFaceEmbeddings
 
 from rag_pipeline.retrieval import hybrid_search, answer_from_docs
 
-# Gimini pricing
-INPUT_COST_PER_1K  = 0.000075
-OUTPUT_COST_PER_1K = 0.000300
+# Groq qwen3-32b pricing (per 1K tokens)
+INPUT_COST_PER_1K  = 0.00000029
+OUTPUT_COST_PER_1K = 0.00000059
 CHARS_PER_TOKEN    = 4
 
-ragas_llm = LangchainLLMWrapper(ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    google_api_key=os.getenv("GOOGLE_API_KEY"),
+ragas_llm = LangchainLLMWrapper(ChatGroq(
+    model="qwen/qwen3-32b",
+    api_key=os.getenv("GROQ_API_KEY"),
+    temperature=0.2,
+    reasoning_effort="none",
 ))
 
 ragas_embeddings = LangchainEmbeddingsWrapper(
-    GoogleGenerativeAIEmbeddings(
-        model="models/embedding-001",
-        google_api_key=os.getenv("GOOGLE_API_KEY"),
-    )
+    HuggingFaceEmbeddings(model_name="BAAI/bge-small-en-v1.5")
 )
 
 @dataclass
@@ -111,10 +114,11 @@ def run_ragas(metrics):
     })
 
     results = evaluate(
-        dataset  = dataset,
-        metrics  = [_faithfulness, _answer_relevancy, _context_entity_recall],
-        llm      = ragas_llm,
+        dataset    = dataset,
+        metrics    = [_faithfulness, _answer_relevancy, _context_entity_recall],
+        llm        = ragas_llm,
         embeddings = ragas_embeddings,
+        run_config = RunConfig(max_workers=1, timeout=120),
     )
     return results
 
@@ -133,13 +137,13 @@ def summerise_latency_and_cost(metrics):
 
 # Example usage
 def run_evaluation(qa_pairs, bm25_paths):
-    print("\n── Collecting metrics ───────────────────────────")
+    print("\n-- Collecting metrics ---------------------------")
     metrics = collect_metrics(qa_pairs, bm25_paths)
 
-    print("\n── Running RAGAS evaluation ─────────────────────")
+    print("\n-- Running RAGAS evaluation ---------------------")
     ragas_scores = run_ragas(metrics)
 
-    print("\n── Summarising latency + cost ───────────────────")
+    print("\n-- Summarising latency + cost -------------------")
     perf_scores = summerise_latency_and_cost(metrics)
 
     ragas_dict = ragas_scores.to_pandas().mean(numeric_only=True).to_dict()

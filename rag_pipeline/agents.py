@@ -1,22 +1,26 @@
 import os
+import re
 from dotenv import load_dotenv
 load_dotenv()
 
-from langchain_google_genai import ChatGoogleGenerativeAI
+def _strip_thinking(text: str) -> str:
+    return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+
+from langchain_groq import ChatGroq
 from langgraph.prebuilt import create_react_agent
 from langchain_core.tools import tool
 from tavily import TavilyClient
 import arxiv
 from Bio import Entrez
 
-from rag_pipeline.retrieval import retrieve_and_answer, answer_from_docs
+from rag_pipeline.retrieval import retrieve_and_answer, answer_from_docs, answer_from_web
 
 Entrez.email = os.getenv("NCBI_EMAIL", "test@example.com")
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
+llm = ChatGroq(
+    model="qwen/qwen3-32b",
     temperature=0.2,
-    google_api_key=os.getenv("GOOGLE_API_KEY"),
+    api_key=os.getenv("GROQ_API_KEY"),
     max_retries=3
 )
 
@@ -81,13 +85,13 @@ researcher = create_react_agent(
     model=llm,
     tools=researcher_tools,
     prompt=(
-        "You are a research agent. You MUST follow this strict tool order:\n"
-        "1. ALWAYS call search_arxiv first for any research or science question.\n"
-        "2. If search_arxiv returns no useful results, call search_pubmed next "
-        "(especially for biomedical/clinical topics).\n"
-        "3. Only call search_web if BOTH search_arxiv and search_pubmed failed "
-        "or returned irrelevant results.\n"
-        "Never skip directly to search_web. Cite sources in your answer."
+        "You are a research assistant with access to search tools.\n"
+        "For general knowledge questions (people, places, events, pop culture), "
+        "use search_web directly.\n"
+        "For scientific or academic questions, call search_arxiv first, then "
+        "search_pubmed if needed, and search_web as a last resort.\n"
+        "Always use exactly one tool call at a time with a plain string query. "
+        "Cite sources in your answer."
     )
 )
 
@@ -105,7 +109,7 @@ def orchestrate(question: str, bm25_paths: list[str]) -> dict:
         agent_result = researcher.invoke({
             "messages": [{"role": "user", "content": question}]
         })
-        answer_text = agent_result["messages"][-1].content
+        answer_text = _strip_thinking(agent_result["messages"][-1].content)
         external_context = [{
             "text":     answer_text,
             "metadata": {"source": "ArXiv / PubMed / Web", "page": "N/A"},
@@ -117,8 +121,12 @@ def orchestrate(question: str, bm25_paths: list[str]) -> dict:
             "source_type": "external",
         }
     except Exception as e:
-        return {
-            "answer":      f"Could not find an answer. Error: {str(e)}",
-            "sources":     [],
-            "source_type": "error",
-        }
+        print(f"  Researcher agent failed ({e}), falling back to Tavily...")
+        try:
+            return answer_from_web(question)
+        except Exception as web_e:
+            return {
+                "answer":      f"Could not find an answer: {str(web_e)}",
+                "sources":     [],
+                "source_type": "error",
+            }

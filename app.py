@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -6,7 +7,7 @@ import time
 import requests
 import streamlit as st
 
-API = "http://localhost:8000"
+API = os.getenv("API_URL", "http://localhost:8000")
 
 st.set_page_config(
     page_title="Reasearch Assistant",
