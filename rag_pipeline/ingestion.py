@@ -18,7 +18,13 @@ CHUCK_OVERLAP = 64
 BM25_DIR = Path("bm25_index")
 BM25_DIR.mkdir(exist_ok=True)
 
-embedder = SentenceTransformer(EMBED_MODEL)
+_embedder = None
+
+def get_embedder():
+    global _embedder
+    if _embedder is None:
+        _embedder = SentenceTransformer(EMBED_MODEL)
+    return _embedder
 
 #pinecone connection
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
@@ -76,7 +82,7 @@ def embed_and_store(chunks, paper_id, index):
     """
     texts = [chunk["text"] for chunk in chunks]
     print(f"Embedding {len(chunks)} chunks....")
-    vectors = embedder.encode(
+    vectors = get_embedder().encode(
         texts,
         batch_size=32,
         normalize_embeddings=True,
