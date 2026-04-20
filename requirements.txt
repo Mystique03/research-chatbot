@@ -1,43 +1,38 @@
-torch
-
-#llm and RAG
+# LLM and RAG
 langchain
-langchain-community
 langchain-core
+langchain-text-splitters
 langchain-groq
-langchain-huggingface
+langgraph
 
-#embeddings, vector-DB and hybrid search
+# Embeddings, vector DB and hybrid search
 sentence-transformers
 pinecone
 rank-bm25
 
-#pdf parsing
+# PDF parsing
 pymupdf
-unstructured[pdf]
-unstructured
 
-#web fallback (web search)
+# Web search and research tools
 tavily-python
 arxiv
 biopython
 
-#UI and API
+# UI and API
 streamlit
 fastapi
 uvicorn
 python-multipart
-httpx
+requests
 pydantic
 
-#helper libs
+# Helper libs
 python-dotenv
 numpy
-pandas
 tqdm
-tiktoken
 
-#evaluation
+# Evaluation
+langchain-huggingface
 ragas
 datasets
 scikit-learn
