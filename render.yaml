@@ -3,8 +3,8 @@ services:
     name: research-assistant-api
     runtime: python
     plan: free
-    buildCommand: uv pip install -r requirements.txt
-    startCommand: uv run uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: GROQ_API_KEY
         sync: false
@@ -21,7 +21,7 @@ services:
     name: research-assistant-ui
     runtime: python
     plan: free
-    buildCommand: uv pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt
     startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0
     envVars:
       - key: API_URL
