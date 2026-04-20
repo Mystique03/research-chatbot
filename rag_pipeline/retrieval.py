@@ -6,7 +6,6 @@ load_dotenv()
 
 import re
 import numpy as np
-from fastembed import TextEmbedding
 from pinecone import Pinecone
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
@@ -28,6 +27,7 @@ _embedder = None
 def get_embedder():
     global _embedder
     if _embedder is None:
+        from fastembed import TextEmbedding
         _embedder = TextEmbedding(EMBED_MODEL)
     return _embedder
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))

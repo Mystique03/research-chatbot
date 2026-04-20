@@ -7,7 +7,6 @@ load_dotenv()
 import fitz
 #from unstructured.partition.pdf import partition_pdf
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from fastembed import TextEmbedding
 from pinecone import Pinecone, ServerlessSpec
 from rank_bm25 import BM25Okapi
 from tqdm import tqdm
@@ -23,6 +22,7 @@ _embedder = None
 def get_embedder():
     global _embedder
     if _embedder is None:
+        from fastembed import TextEmbedding
         _embedder = TextEmbedding(EMBED_MODEL)
     return _embedder
 
