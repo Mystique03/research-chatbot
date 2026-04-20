@@ -6,7 +6,7 @@ load_dotenv()
 
 import re
 import numpy as np
-from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
 from pinecone import Pinecone
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
@@ -28,7 +28,7 @@ _embedder = None
 def get_embedder():
     global _embedder
     if _embedder is None:
-        _embedder = SentenceTransformer(EMBED_MODEL)
+        _embedder = TextEmbedding(EMBED_MODEL)
     return _embedder
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 llm = ChatGroq(
@@ -43,7 +43,7 @@ def hybrid_search(query, bm25_paths):
     """Perform hybrid search using BM25 and Pinecone vector search"""
     index = pc.Index(INDEX_NAME)
 
-    query_vec = get_embedder().encode([query], normalize_embeddings=True)[0].tolist()
+    query_vec = list(get_embedder().embed([query]))[0].tolist()
     dense_matches = index.query(
         vector = query_vec, top_k=TOP_K*2, include_metadata=True
     )["matches"]

@@ -15,7 +15,7 @@ _answer_relevancy.strictness = 1
 from ragas.llms import LangchainLLMWrapper
 from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_groq import ChatGroq
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings import FastEmbedEmbeddings
 
 from rag_pipeline.retrieval import hybrid_search, answer_from_docs
 
@@ -32,7 +32,7 @@ ragas_llm = LangchainLLMWrapper(ChatGroq(
 ))
 
 ragas_embeddings = LangchainEmbeddingsWrapper(
-    HuggingFaceEmbeddings(model_name="BAAI/bge-small-en-v1.5")
+    FastEmbedEmbeddings(model_name="BAAI/bge-small-en-v1.5")
 )
 
 @dataclass

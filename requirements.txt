@@ -6,7 +6,7 @@ langchain-groq
 langgraph
 
 # Embeddings, vector DB and hybrid search
-sentence-transformers
+fastembed
 pinecone
 rank-bm25
 
@@ -32,7 +32,7 @@ numpy
 tqdm
 
 # Evaluation
-langchain-huggingface
+langchain-community
 ragas
 datasets
 scikit-learn
