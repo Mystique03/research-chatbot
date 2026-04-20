@@ -7,7 +7,7 @@ load_dotenv()
 import fitz
 #from unstructured.partition.pdf import partition_pdf
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
 from pinecone import Pinecone, ServerlessSpec
 from rank_bm25 import BM25Okapi
 from tqdm import tqdm
@@ -23,7 +23,7 @@ _embedder = None
 def get_embedder():
     global _embedder
     if _embedder is None:
-        _embedder = SentenceTransformer(EMBED_MODEL)
+        _embedder = TextEmbedding(EMBED_MODEL)
     return _embedder
 
 #pinecone connection
@@ -82,12 +82,7 @@ def embed_and_store(chunks, paper_id, index):
     """
     texts = [chunk["text"] for chunk in chunks]
     print(f"Embedding {len(chunks)} chunks....")
-    vectors = get_embedder().encode(
-        texts,
-        batch_size=32,
-        normalize_embeddings=True,
-        show_progress_bar=True
-    )
+    vectors = list(get_embedder().embed(texts))
 
     # Upsert into pinecode
     records = [
