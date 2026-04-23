@@ -91,7 +91,8 @@ def hybrid_search(query, bm25_paths):
 
 QA_PROMPT = ChatPromptTemplate.from_template("""
 You are a research assistant analyzing a paper. Answer the question using the context below.
-Cite page numbers inline like (page 3). If the answer is partially in the context, give that partial answer.
+Cite page numbers inline like (page 3). 
+If the answer is partially in the context, give that partial answer.
                                               
 Context:
 {context}

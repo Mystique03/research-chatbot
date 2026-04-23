@@ -84,6 +84,7 @@ def embed_and_store(chunks, paper_id, index):
     print(f"Embedding {len(chunks)} chunks....")
     vectors = list(get_embedder().embed(texts))
 
+
     # Upsert into pinecode
     records = [
         {
