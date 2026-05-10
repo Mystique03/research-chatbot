@@ -56,7 +56,7 @@ def parse_pdf(pdf_path):
     return pages
 
 def chunk_pages(pages, paper_id):
-    """split each page into overlapping chunks. Using metadat for citation"""
+    """split each page into overlapping chunks. Using metadata for citation"""
 
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE,
