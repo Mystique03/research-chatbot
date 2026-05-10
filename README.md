@@ -1,3 +1,12 @@
+---
+title: Research Paper Summarizer
+emoji: 📚
+colorFrom: pink
+colorTo: red
+sdk: docker
+pinned: false
+---
+
 # Research Paper Summarizer
 
 A RAG-powered research assistant that lets you upload academic papers (PDF), get instant summaries, and ask questions about their content. Falls back to ArXiv, PubMed, and web search when answers aren't found in the uploaded papers.
