@@ -1,48 +1,21 @@
----
-title: Research Paper Summarizer
-emoji: 🐨
-colorFrom: pink
-colorTo: red
-sdk: docker
-pinned: false
----
-
 # Research Paper Summarizer
 
 A RAG-powered research assistant that lets you upload academic papers (PDF), get instant summaries, and ask questions about their content. Falls back to ArXiv, PubMed, and web search when answers aren't found in the uploaded papers.
 
-**Live demo:** https://huggingface.co/spaces/Mystique03/research-paper-summarizer
+**Try It:** https://huggingface.co/spaces/Mystique03/research-paper-summarizer
 
 ---
 
 ## Features
 
-- **PDF Ingestion** — upload one or more research papers; text is extracted, chunked, embedded, and stored in Pinecone
-- **Hybrid Search** — combines dense vector search (Pinecone) with sparse keyword search (BM25) for better retrieval
-- **Summarization** — generates structured summaries of ingested papers using Groq LLM
-- **Chat Interface** — ask natural language questions; answers include source citations with page numbers
-- **External Fallback** — when the answer isn't in the paper, automatically queries ArXiv, PubMed, or the web via Tavily
-- **Multi-paper support** — ingest multiple papers and query across all of them
+- **PDF Ingestion** : upload one or more research papers; text is extracted, chunked, embedded, and stored in Pinecone
+- **Hybrid Search** : combines dense vector search (Pinecone) with sparse keyword search (BM25) for better retrieval
+- **Summarization** : generates structured summaries of ingested papers using Qwen LLM
+- **Chat Interface** : ask natural language questions; answers include source citations with page numbers
+- **External Fallback** : when the answer isn't in the paper, automatically queries ArXiv, PubMed, or the web via Tavily
+- **Multi-paper support** : ingest multiple papers and query across all of them
 
 ---
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────┐
-│                  HF Spaces Docker                   │
-│                                                     │
-│  ┌─────────────────┐      ┌──────────────────────┐  │
-│  │  Streamlit UI   │ ───► │   FastAPI Backend    │  │
-│  │   (port 7860)   │      │    (port 8000)       │  │
-│  └─────────────────┘      └──────────────────────┘  │
-│                                   │                 │
-│                    ┌──────────────┼──────────────┐  │
-│                    ▼              ▼              ▼  │
-│               Pinecone        BM25 Index      Groq  │
-│             (vector DB)       (local pkl)    (LLM)  │
-└─────────────────────────────────────────────────────┘
-```
 
 **RAG Pipeline:**
 1. PDF → text extraction (PyMuPDF) → chunking (512 tokens, 64 overlap)
@@ -60,11 +33,11 @@ A RAG-powered research assistant that lets you upload academic papers (PDF), get
 | Frontend | Streamlit |
 | Backend | FastAPI + Uvicorn |
 | Orchestration | LangGraph |
-| LLM | Groq (llama/mixtral) |
+| LLM | Groq (Qwen 2.5) |
 | Embeddings | FastEmbed — `BAAI/bge-small-en-v1.5` |
-| Vector DB | Pinecone (serverless, AWS us-east-1) |
+| Vector DB | Pinecone |
 | Keyword Search | rank-bm25 |
-| PDF Parsing | PyMuPDF (fitz) |
+| PDF Parsing | PyMuPDF |
 | Web Search | Tavily |
 | Research DBs | ArXiv, PubMed (Biopython) |
 
@@ -75,8 +48,7 @@ A RAG-powered research assistant that lets you upload academic papers (PDF), get
 **Prerequisites:** Python 3.11, API keys for Pinecone, Groq, and Tavily
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/research-paper-summarizer
-cd research-paper-summarizer
+git clone https://github.com/Mystique03/research-chatbot
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -88,7 +60,6 @@ PINECONE_API_KEY=your_key
 PINECONE_INDEX_NAME=research-papers
 GROQ_API_KEY=your_key
 TAVILY_API_KEY=your_key
-GOOGLE_API_KEY=your_key
 ```
 
 Start backend:
@@ -117,13 +88,6 @@ Set the following in **Space Settings → Variables and secrets:**
 | `PINECONE_INDEX_NAME` | `research-papers` |
 | `GROQ_API_KEY` | your Groq key |
 | `TAVILY_API_KEY` | your Tavily key |
-| `GOOGLE_API_KEY` | your Google key |
-
-Push to deploy:
-```bash
-git remote add hf https://huggingface.co/spaces/Mystique03/research-paper-summarizer
-git push hf main
-```
 
 ---
 
